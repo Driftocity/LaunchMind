@@ -206,8 +206,8 @@
 </div>
 
 <script>
-const GEMINI_KEY = 'AIzaSyC-UNXjDVfUCPMnc-3tFz3pfuDmjgsBnLo';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+// NOTE: No API key here anymore. The browser calls our own /api/generate
+// serverless route, which holds the real Anthropic key server-side.
 
 let userData = {};
 let fullPlanText = '';
@@ -223,27 +223,19 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-async function callGemini(prompt) {
-  const resp = await fetch(GEMINI_URL, {
+async function callClaude(prompt, maxTokens = 1000) {
+  const resp = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
-    })
+    body: JSON.stringify({ prompt, max_tokens: maxTokens })
   });
-
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error('API error ' + resp.status + ': ' + err);
-  }
 
   const data = await resp.json();
 
-  if (data.error) throw new Error(data.error.message);
-  if (!data.candidates || !data.candidates[0]) throw new Error('No response from AI');
+  if (!resp.ok) throw new Error(data.error || 'API error ' + resp.status);
+  if (!data.text) throw new Error('No response from AI');
 
-  return data.candidates[0].content.parts.map(p => p.text || '').join('');
+  return data.text;
 }
 
 async function typeOut(elementId, text, speed = 6) {
@@ -301,7 +293,7 @@ Budget: ${budget}
 
 Keep it conversational and under 200 words. No headers, just flowing paragraphs.`;
 
-    const result = await callGemini(prompt);
+    const result = await callClaude(prompt, 600);
     await typeOut('out1', result, 6);
     userData.validation = result;
   } catch(e) {
@@ -344,7 +336,7 @@ Problem being solved: ${problem}
 
 Keep it under 180 words. No headers, conversational tone, specific and actionable.`;
 
-    const result = await callGemini(prompt);
+    const result = await callClaude(prompt, 500);
     await typeOut('out2', result, 6);
     userData.market = result;
   } catch(e) {
@@ -385,7 +377,7 @@ Problem solved: ${userData.problem || 'Not provided'}
 
 Be specific and practical. Each section 3-6 sentences or bullet points. Total around 500-600 words. Write like a mentor who wants them to succeed.`;
 
-    const result = await callGemini(prompt);
+    const result = await callClaude(prompt, 1500);
     fullPlanText = result;
 
     const sections = parsePlan(result);
@@ -431,4 +423,4 @@ function downloadPlan() {
 }
 </script>
 </body>
-  </html>
+</html>
