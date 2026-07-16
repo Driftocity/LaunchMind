@@ -3,424 +3,532 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LaunchMind — AI Business Plan Builder</title>
+<title>LaunchMind — Your Plan is Ready</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap');
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0b0f1a; --card: #131928; --border: #1e2840;
-    --accent: #6c63ff; --accent2: #a78bfa; --green: #22d3a0;
-    --text: #e8eaf6; --muted: #7b82a0; --danger: #f87171;
+  :root{
+    --navy-deep:#060a14;
+    --navy:#0b1220;
+    --navy-surface:#111a2c;
+    --navy-surface-2:#16203a;
+    --line:#22304f;
+    --gold:#d4af37;
+    --gold-bright:#f0cf5f;
+    --gold-dim:#8a6d1f;
+    --text:#e9e7de;
+    --text-dim:#9aa5bd;
+    --text-faint:#5d6b8a;
+    --good:#4fd18b;
   }
-  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-  .hero { width: 100%; text-align: center; padding: 48px 20px 32px; background: linear-gradient(180deg, #10153a 0%, var(--bg) 100%); border-bottom: 1px solid var(--border); }
-  .badge { display: inline-block; background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.4); color: var(--accent2); font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 18px; }
-  .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 6vw, 3.4rem); font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, #fff 30%, var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 14px; }
-  .hero p { color: var(--muted); font-size: 1rem; max-width: 480px; margin: 0 auto 24px; line-height: 1.6; }
-  .steps-bar { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-  .step-pill { display: flex; align-items: center; gap: 7px; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--muted); transition: all .3s; }
-  .step-pill.active { border-color: var(--accent); color: var(--accent2); }
-  .step-pill.done { border-color: var(--green); color: var(--green); }
-  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-  .main { width: 100%; max-width: 680px; padding: 32px 20px 80px; }
-  .screen { display: none; }
-  .screen.active { display: block; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; margin-bottom: 20px; }
-  .card-label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent2); margin-bottom: 10px; }
-  .card h2 { font-family: 'Syne', sans-serif; font-size: 1.4rem; margin-bottom: 8px; }
-  .card p { color: var(--muted); font-size: .92rem; line-height: 1.6; }
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: .85rem; font-weight: 500; color: var(--muted); margin-bottom: 7px; }
-  .field input, .field textarea, .field select { width: 100%; background: #0e1322; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: .95rem; padding: 12px 14px; outline: none; transition: border-color .2s; resize: vertical; }
-  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
-  .field textarea { min-height: 80px; }
-  .btn { display: block; width: 100%; padding: 15px; border: none; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .2s; text-align: center; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #574fd6; transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-  .btn-green { background: var(--green); color: #0b1a14; font-size: 1.05rem; }
-  .btn-green:hover { background: #1fb88d; }
-  .output-block { background: #0e1322; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px; font-size: .9rem; line-height: 1.75; color: #c8cfe8; white-space: pre-wrap; min-height: 60px; }
-  .typing::after { content: '▋'; animation: blink .7s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
-  .paywall-card { background: linear-gradient(135deg, #1a1040 0%, #131928 100%); border: 1px solid rgba(108,99,255,.5); border-radius: 20px; padding: 36px 28px; text-align: center; position: relative; overflow: hidden; }
-  .paywall-card::before { content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%); width: 220px; height: 220px; background: radial-gradient(circle, rgba(108,99,255,.25) 0%, transparent 70%); pointer-events: none; }
-  .lock-icon { font-size: 2.8rem; margin-bottom: 14px; }
-  .paywall-card h2 { font-family: 'Syne', sans-serif; font-size: 1.7rem; margin-bottom: 10px; }
-  .paywall-card p { color: var(--muted); font-size: .95rem; line-height: 1.6; max-width: 380px; margin: 0 auto 22px; }
-  .price-tag { display: inline-flex; align-items: baseline; gap: 4px; margin-bottom: 24px; }
-  .price-tag .dollar { font-size: 1.5rem; color: var(--accent2); font-weight: 700; }
-  .price-tag .amount { font-family: 'Syne', sans-serif; font-size: 4rem; font-weight: 800; color: #fff; line-height: 1; }
-  .price-tag .note { font-size: .85rem; color: var(--muted); }
-  .unlock-list { list-style: none; margin: 0 auto 28px; max-width: 320px; text-align: left; }
-  .unlock-list li { padding: 7px 0; font-size: .9rem; color: #b0b8d8; display: flex; gap: 10px; border-bottom: 1px solid var(--border); }
-  .unlock-list li:last-child { border: none; }
-  .unlock-list .check { color: var(--green); }
-  .guarantee { margin-top: 16px; font-size: .8rem; color: var(--muted); display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .result-section { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; font-size: .9rem; line-height: 1.75; color: #c8cfe8; white-space: pre-wrap; }
-  .result-section h3 { font-family: 'Syne', sans-serif; font-size: 1rem; color: #fff; margin-bottom: 10px; }
-  .download-btn { background: #1a2540; border: 1px solid var(--border); border-radius: 10px; color: var(--accent2); font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 500; padding: 11px 20px; cursor: pointer; margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; transition: background .2s; }
-  .download-btn:hover { background: #1e2d50; }
-  .loader { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .9rem; padding: 16px 0; }
-  .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .progress-wrap { height: 3px; background: var(--border); border-radius: 3px; margin-bottom: 28px; overflow: hidden; }
-  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 3px; transition: width .5s ease; }
-  .error-msg { color: var(--danger); font-size: .85rem; margin-top: 8px; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--navy-deep);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:96px;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  /* circuit background wash */
+  .circuit-bg{
+    position:fixed; inset:0; z-index:-1; opacity:0.35;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 10%, transparent 75%);
+  }
+
+  header{
+    max-width:920px; margin:0 auto; padding:36px 24px 8px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .logo{
+    font-weight:700; font-size:1.15rem; letter-spacing:0.02em;
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo-mark{
+    width:22px;height:22px; position:relative; flex:none;
+  }
+  .logo-mark svg{width:100%;height:100%;}
+  .status-pill{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--good);
+    border:1px solid rgba(79,209,139,0.35); background:rgba(79,209,139,0.08);
+    padding:5px 10px; border-radius:100px; letter-spacing:0.03em;
+    display:flex; align-items:center; gap:6px;
+  }
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--good); box-shadow:0 0 8px var(--good);}
+
+  main{max-width:920px; margin:0 auto; padding:0 24px;}
+
+  .hero{
+    padding:28px 0 20px; border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--gold);
+    letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px;
+  }
+  h1{
+    font-size:clamp(1.6rem,4vw,2.3rem); font-weight:700; letter-spacing:-0.01em;
+    max-width:640px;
+  }
+  h1 span{color:var(--gold-bright);}
+  .sub{color:var(--text-dim); margin-top:10px; max-width:560px; font-size:0.98rem;}
+
+  /* countdown bar */
+  .expiry{
+    margin-top:20px; display:flex; align-items:center; gap:12px;
+    font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--text-dim);
+  }
+  .expiry .clock{
+    color:var(--gold-bright); font-weight:600; letter-spacing:0.03em;
+    border:1px solid var(--gold-dim); padding:4px 10px; border-radius:6px;
+    background:rgba(212,175,55,0.06);
+  }
+
+  /* circuit progress — the signature element */
+  .circuit-progress{
+    margin:28px 0 8px; padding:18px 20px; border:1px solid var(--line);
+    border-radius:10px; background:var(--navy-surface);
+  }
+  .circuit-progress .cp-label{
+    font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-faint);
+    text-transform:uppercase; letter-spacing:0.1em; margin-bottom:12px;
+  }
+  .circuit-svg{width:100%; height:auto; display:block;}
+  .circuit-svg .trace-done{stroke:var(--gold-bright); stroke-width:2; fill:none;
+    filter:drop-shadow(0 0 4px rgba(240,207,95,0.6));}
+  .circuit-svg .trace-pending{stroke:var(--text-faint); stroke-width:2; fill:none;
+    stroke-dasharray:4 5; opacity:0.55;}
+  .circuit-svg .node-done{fill:var(--gold-bright); filter:drop-shadow(0 0 5px rgba(240,207,95,0.8));}
+  .circuit-svg .node-pending{fill:var(--navy-surface-2); stroke:var(--text-faint); stroke-width:1.5;}
+  .circuit-svg text{font-family:'JetBrains Mono',monospace; font-size:9.5px;}
+  .circuit-svg .t-done{fill:var(--text-dim);}
+  .circuit-svg .t-pending{fill:var(--text-faint);}
+
+  /* sections of the plan */
+  .plan-section{
+    margin-top:22px; border:1px solid var(--line); border-radius:10px;
+    background:var(--navy-surface); overflow:hidden;
+  }
+  .plan-section .ps-head{
+    padding:16px 20px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--line);
+  }
+  .ps-title{display:flex; align-items:center; gap:10px; font-weight:600; font-size:1rem;}
+  .ps-num{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--navy-deep);
+    background:var(--gold-bright); width:22px;height:22px; border-radius:5px;
+    display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .ps-num.locked{background:transparent; border:1px solid var(--text-faint); color:var(--text-faint);}
+  .ps-body{padding:18px 20px; color:var(--text-dim); font-size:0.94rem;}
+  .ps-body p + p{margin-top:10px;}
+  .ps-body strong{color:var(--text);}
+
+  .badge-free{
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--good);
+    border:1px solid rgba(79,209,139,0.3); padding:3px 8px; border-radius:100px;
+  }
+  .badge-locked{
+    font-family:'JetBrains Mono',monospace; font-size:0.66rem; color:var(--gold);
+    border:1px solid var(--gold-dim); padding:3px 8px; border-radius:100px;
+    display:flex; align-items:center; gap:5px;
+  }
+
+  /* locked section w/ blur + overlay */
+  .locked-wrap{position:relative;}
+  .locked-content{
+    filter:blur(5px); user-select:none; pointer-events:none;
+    padding:18px 20px; color:var(--text-faint); font-size:0.94rem;
+  }
+  .locked-content p + p{margin-top:10px;}
+  .locked-overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    background:linear-gradient(180deg, rgba(17,26,44,0.4), rgba(17,26,44,0.92));
+    gap:10px; padding:20px;
+  }
+  .lock-icon{width:26px;height:26px; color:var(--gold);}
+  .locked-overlay .lo-title{font-weight:600; font-size:0.95rem;}
+  .locked-overlay .lo-sub{font-size:0.82rem; color:var(--text-dim); max-width:320px;}
+
+  /* sticky CTA bar */
+  .sticky-cta{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background:rgba(6,10,20,0.88); backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    padding:14px 20px; display:flex; align-items:center; justify-content:center; gap:18px;
+  }
+  .sticky-inner{
+    max-width:920px; width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .price-block{display:flex; align-items:baseline; gap:8px;}
+  .price{font-size:1.5rem; font-weight:700; color:var(--gold-bright);}
+  .price-note{font-size:0.76rem; color:var(--text-faint); font-family:'JetBrains Mono',monospace;}
+  .cta-btn{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.98rem;
+    background:var(--gold-bright); color:var(--navy-deep); border:none;
+    padding:13px 26px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow:0 0 0 rgba(240,207,95,0);
+  }
+  .cta-btn:hover{transform:translateY(-1px); box-shadow:0 6px 20px rgba(240,207,95,0.25);}
+  .cta-btn:active{transform:translateY(0px);}
+  .cta-sub{font-size:0.72rem; color:var(--text-faint); margin-top:4px; font-family:'JetBrains Mono',monospace;}
+
+  /* social proof strip */
+  .proof{
+    margin-top:26px; display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:14px; padding:16px 20px; border:1px solid var(--line);
+    border-radius:10px; background:var(--navy-surface);
+  }
+  .proof-count{font-family:'JetBrains Mono',monospace; font-size:0.86rem; color:var(--text);}
+  .proof-count b{color:var(--gold-bright);}
+  .stars{color:var(--gold-bright); letter-spacing:2px; font-size:0.9rem;}
+  .quote{
+    font-size:0.85rem; color:var(--text-dim); max-width:420px; font-style:italic;
+  }
+
+  /* bonus strip */
+  .bonus{
+    margin-top:18px; border:1px dashed var(--gold-dim); border-radius:10px;
+    padding:16px 20px; background:rgba(212,175,55,0.05);
+    display:flex; align-items:center; gap:14px;
+  }
+  .bonus-icon{width:30px;height:30px; flex:none; color:var(--gold-bright);}
+  .bonus-title{font-weight:600; font-size:0.92rem;}
+  .bonus-sub{font-size:0.82rem; color:var(--text-dim); margin-top:2px;}
+
+  footer.foot{
+    text-align:center; color:var(--text-faint); font-size:0.78rem;
+    padding:40px 20px 20px; font-family:'JetBrains Mono',monospace;
+  }
+
+  @media (max-width:560px){
+    .sticky-inner{justify-content:center; text-align:center;}
+    .price-block{order:2;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto;}
+    .cta-btn{transition:none;}
+  }
+
+  /* signup gate */
+  .signup-wrap{
+    max-width:920px; margin:0 auto; padding:60px 24px 40px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    min-height:70vh; justify-content:center;
+  }
+  .signup-eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--gold);
+    letter-spacing:0.12em; text-transform:uppercase; margin-bottom:14px;
+  }
+  .signup-wrap h1{
+    max-width:640px; margin:0 auto;
+  }
+  .signup-sub{color:var(--text-dim); margin-top:14px; max-width:480px; font-size:0.98rem;}
+  .signup-card{
+    margin-top:34px; width:100%; max-width:440px; border:1px solid var(--line);
+    border-radius:12px; background:var(--navy-surface); padding:26px;
+    text-align:left;
+  }
+  .field-label{
+    font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text-faint);
+    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; display:block;
+  }
+  .field{
+    width:100%; background:var(--navy-deep); border:1px solid var(--line);
+    border-radius:8px; padding:12px 14px; color:var(--text); font-family:'Space Grotesk',sans-serif;
+    font-size:0.95rem; margin-bottom:16px; outline:none; transition:border-color 0.15s ease;
+  }
+  .field:focus{border-color:var(--gold-dim);}
+  .field::placeholder{color:var(--text-faint);}
+  .signup-btn{
+    width:100%; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.98rem;
+    background:var(--gold-bright); color:var(--navy-deep); border:none;
+    padding:14px 20px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .signup-btn:hover{transform:translateY(-1px); box-shadow:0 6px 20px rgba(240,207,95,0.25);}
+  .signup-note{
+    text-align:center; font-size:0.74rem; color:var(--text-faint); margin-top:12px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .signup-perks{
+    margin-top:26px; display:flex; gap:22px; flex-wrap:wrap; justify-content:center;
+  }
+  .perk{
+    display:flex; align-items:center; gap:7px; font-size:0.82rem; color:var(--text-dim);
+  }
+  .perk svg{width:15px;height:15px; color:var(--good); flex:none;}
+
+  #resultsRoot{display:none;}
+  #resultsRoot.show{display:block;}
+  #signupRoot.hide{display:none;}
 </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="badge">✦ AI-Powered</div>
-  <h1>Your Business Plan,<br>Built in Minutes</h1>
-  <p>Answer a few questions. LaunchMind builds your custom plan — idea validation, target market, revenue model, and full launch strategy.</p>
-  <div class="steps-bar">
-    <div class="step-pill active" id="pill1"><div class="step-dot"></div> Idea Validation</div>
-    <div class="step-pill" id="pill2"><div class="step-dot"></div> Target Market</div>
-    <div class="step-pill" id="pill3"><div class="step-dot"></div> Full Business Plan</div>
+<div class="circuit-bg"></div>
+
+<div id="signupRoot">
+  <header>
+    <div class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#d4af37" stroke-width="1.5"/>
+          <path d="M12 6v4M12 14v4M6 12h4M14 12h4" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="2" fill="#d4af37"/>
+        </svg>
+      </span>
+      LaunchMind
+    </div>
+  </header>
+
+  <div class="signup-wrap">
+    <div class="signup-eyebrow">Free trial · No card required</div>
+    <h1>Turn your business idea into a real plan in under 2 minutes.</h1>
+    <p class="signup-sub">Answer a few questions about your business and get a free draft plan instantly — overview, target market, and competition, on us.</p>
+
+    <div class="signup-card">
+      <label class="field-label" for="bizName">Business name</label>
+      <input class="field" id="bizName" type="text" placeholder="e.g. Your Business Name">
+
+      <label class="field-label" for="bizEmail">Email address</label>
+      <input class="field" id="bizEmail" type="email" placeholder="you@example.com">
+
+      <button class="signup-btn" onclick="revealResults()">
+        Generate my free plan
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="signup-note">Takes about 90 seconds · No credit card needed</div>
+    </div>
+
+    <div class="signup-perks">
+      <div class="perk"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Free draft, no card</div>
+      <div class="perk"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Ready in under 2 minutes</div>
+      <div class="perk"><svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg> Unlock full plan anytime</div>
+    </div>
   </div>
 </div>
 
-<div class="main">
-  <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:20%"></div></div>
+<div id="resultsRoot">
+<header>
+  <div class="logo">
+    <span class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="#d4af37" stroke-width="1.5"/>
+        <path d="M12 6v4M12 14v4M6 12h4M14 12h4" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="2" fill="#d4af37"/>
+      </svg>
+    </span>
+    LaunchMind
+  </div>
+  <div class="status-pill"><span class="dot"></span> Plan generated</div>
+</header>
 
-  <!-- SCREEN 1 -->
-  <div class="screen active" id="screen1">
-    <div class="card">
-      <div class="card-label">Step 1 of 3 — Free</div>
-      <h2>Tell me about your idea</h2>
-      <p>Doesn't have to be perfect. Just describe what you're thinking.</p>
+<main>
+
+  <section class="hero">
+    <div class="eyebrow">Your business plan · Draft complete</div>
+    <h1>Nice work — your plan for <span class="js-biz-name">Your Business</span> is drafted.</h1>
+    <p class="sub">We built this from what you told us about your business. Two sections are ready to read below. The rest — financials, funding ask, and your export-ready PDF — are one step away.</p>
+
+    <div class="expiry">
+      <span>This draft is saved for</span>
+      <span class="clock mono" id="clock">23:58:41</span>
+      <span>before it's cleared</span>
     </div>
-    <div class="field">
-      <label>What's your business idea?</label>
-      <textarea id="idea" placeholder="Example: A mobile app that helps dog owners find local dog sitters on short notice..."></textarea>
-    </div>
-    <div class="field">
-      <label>What industry is this in?</label>
-      <select id="industry">
-        <option value="">— Pick one —</option>
-        <option>E-commerce / Retail</option>
-        <option>Food & Beverage</option>
-        <option>Health & Wellness</option>
-        <option>Tech / Software / App</option>
-        <option>Services / Freelance</option>
-        <option>Education / Coaching</option>
-        <option>Real Estate</option>
-        <option>Finance / Investing</option>
-        <option>Beauty / Fashion</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Do you have any startup budget in mind?</label>
-      <select id="budget">
-        <option value="">— Pick one —</option>
-        <option>$0 – $500 (bootstrapping)</option>
-        <option>$500 – $2,000</option>
-        <option>$2,000 – $10,000</option>
-        <option>$10,000+</option>
-        <option>Not sure yet</option>
-      </select>
-    </div>
-    <button class="btn btn-primary" id="btn1" onclick="runStep1()">Validate My Idea →</button>
-    <div id="err1" class="error-msg"></div>
+  </section>
+
+  <!-- signature circuit progress element -->
+  <div class="circuit-progress">
+    <div class="cp-label">Plan completion circuit</div>
+    <svg class="circuit-svg" viewBox="0 0 880 90" xmlns="http://www.w3.org/2000/svg">
+      <path class="trace-done" d="M40 45 H180"/>
+      <path class="trace-done" d="M180 45 H320"/>
+      <path class="trace-done" d="M320 45 H460"/>
+      <path class="trace-pending" d="M460 45 H600"/>
+      <path class="trace-pending" d="M600 45 H740"/>
+      <path class="trace-pending" d="M740 45 H840"/>
+
+      <circle class="node-done" cx="40" cy="45" r="7"/>
+      <circle class="node-done" cx="180" cy="45" r="7"/>
+      <circle class="node-done" cx="320" cy="45" r="7"/>
+      <circle class="node-done" cx="460" cy="45" r="7"/>
+      <circle class="node-pending" cx="600" cy="45" r="7"/>
+      <circle class="node-pending" cx="740" cy="45" r="7"/>
+      <circle class="node-pending" cx="840" cy="45" r="7"/>
+
+      <text class="t-done" x="40" y="72" text-anchor="middle">Idea</text>
+      <text class="t-done" x="180" y="72" text-anchor="middle">Market</text>
+      <text class="t-done" x="320" y="72" text-anchor="middle">Model</text>
+      <text class="t-done" x="460" y="72" text-anchor="middle">Ops</text>
+      <text class="t-pending" x="600" y="72" text-anchor="middle">Financials</text>
+      <text class="t-pending" x="740" y="72" text-anchor="middle">Funding</text>
+      <text class="t-pending" x="840" y="72" text-anchor="middle">Export</text>
+    </svg>
   </div>
 
-  <!-- SCREEN 2 -->
-  <div class="screen" id="screen2">
-    <div class="card">
-      <div class="card-label">Step 1 Complete ✓</div>
-      <h2>Idea Validation</h2>
-      <p>Here's what the AI found about your concept.</p>
-      <div class="output-block" id="out1"></div>
+  <!-- free section 1 -->
+  <div class="plan-section">
+    <div class="ps-head">
+      <div class="ps-title"><span class="ps-num">1</span> Business Overview</div>
+      <span class="badge-free">Unlocked</span>
     </div>
-    <div class="card">
-      <div class="card-label">Step 2 of 3 — Free</div>
-      <h2>Who's your customer?</h2>
-      <p>A little more info so we can nail your target market.</p>
+    <div class="ps-body">
+      <p><strong class="js-biz-name">Your Business</strong> positions itself around the specific promise you described — the thing that makes a customer choose you over the next option in a search result.</p>
+      <p>Your edge: the details you entered about pricing, speed, and service area, distilled into a clear positioning statement you can put on your website today.</p>
     </div>
-    <div class="field">
-      <label>Who are you selling to?</label>
-      <select id="customer">
-        <option value="">— Pick one —</option>
-        <option>Regular consumers (B2C)</option>
-        <option>Small businesses (B2B)</option>
-        <option>Both consumers and businesses</option>
-        <option>Teens / Young adults</option>
-        <option>Parents / Families</option>
-        <option>Seniors</option>
-        <option>Not sure</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>What problem does your idea solve for them?</label>
-      <textarea id="problem" placeholder="Example: Dog owners struggle to find reliable last-minute pet care..."></textarea>
-    </div>
-    <button class="btn btn-primary" id="btn2" onclick="runStep2()">Analyze My Market →</button>
-    <div id="err2" class="error-msg"></div>
   </div>
 
-  <!-- SCREEN 3: PAYWALL -->
-  <div class="screen" id="screen3">
-    <div class="card">
-      <div class="card-label">Step 2 Complete ✓</div>
-      <h2>Target Market Analysis</h2>
-      <p>Your customer breakdown is ready.</p>
-      <div class="output-block" id="out2"></div>
+  <!-- free section 2 -->
+  <div class="plan-section">
+    <div class="ps-head">
+      <div class="ps-title"><span class="ps-num">2</span> Target Market & Competition</div>
+      <span class="badge-free">Unlocked</span>
     </div>
-    <div class="paywall-card">
-      <div class="lock-icon">🔒</div>
-      <h2>Unlock Your Full Business Plan</h2>
-      <p>You've validated your idea and identified your market. Now get everything you need to actually launch — for a one-time fee.</p>
-      <div class="price-tag">
-        <span class="dollar">$</span>
-        <span class="amount">17</span>
-        <span class="note">one-time</span>
+    <div class="ps-body">
+      <p>Your core customer profile is built from the details you entered — age range, location radius, and the moment they're most likely to go looking for what you offer.</p>
+      <p>A handful of local competitors were identified. Your plan flags one clear gap you can move on first, before anyone else does.</p>
+    </div>
+  </div>
+
+  <!-- locked section: financials -->
+  <div class="plan-section locked-wrap">
+    <div class="ps-head">
+      <div class="ps-title"><span class="ps-num locked">3</span> Financial Projections</div>
+      <span class="badge-locked">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0112 0v2M5 10h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.8"/></svg>
+        Locked
+      </span>
+    </div>
+    <div class="locked-content">
+      <p>Year one revenue is projected at $XXX,XXX based on your average sale value and a realistic volume for the hours and staff you told us you have.</p>
+      <p>Break-even is estimated in month X, assuming fixed costs of $X,XXX including insurance, fuel, and equipment financing.</p>
+    </div>
+    <div class="locked-overlay">
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0112 0v2M5 10h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.8"/></svg>
+      <div class="lo-title">Your real numbers are calculated — just locked</div>
+      <div class="lo-sub">Month-by-month revenue, break-even point, and startup costs, built from what you entered.</div>
+    </div>
+  </div>
+
+  <!-- locked section: funding -->
+  <div class="plan-section locked-wrap">
+    <div class="ps-head">
+      <div class="ps-title"><span class="ps-num locked">4</span> Funding Ask & Use of Funds</div>
+      <span class="badge-locked">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0112 0v2M5 10h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.8"/></svg>
+        Locked
+      </span>
+    </div>
+    <div class="locked-content">
+      <p>Recommended ask: $XX,XXX, split across equipment or inventory (X%), initial marketing (X%), and a three-month operating cushion (X%).</p>
+    </div>
+    <div class="locked-overlay">
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0112 0v2M5 10h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.8"/></svg>
+      <div class="lo-title">Exactly what to ask a lender for, and why</div>
+      <div class="lo-sub">A clean funding breakdown you can hand straight to a bank or SBA loan officer.</div>
+    </div>
+  </div>
+
+  <!-- locked section: export -->
+  <div class="plan-section locked-wrap">
+    <div class="ps-head">
+      <div class="ps-title"><span class="ps-num locked">5</span> Downloadable Plan (PDF)</div>
+      <span class="badge-locked">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0112 0v2M5 10h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.8"/></svg>
+        Locked
+      </span>
+    </div>
+    <div class="locked-content">
+      <p>A formatted, print-ready version of everything above — the version you actually hand to a bank, partner, or landlord.</p>
+    </div>
+    <div class="locked-overlay">
+      <svg class="lock-icon" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 0112 0v2M5 10h14a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1v-9a1 1 0 011-1z" stroke="currentColor" stroke-width="1.8"/></svg>
+      <div class="lo-title">One clean PDF, ready to send</div>
+      <div class="lo-sub">Not a screenshot of this page — a real formatted document with your business name on the cover.</div>
+    </div>
+  </div>
+
+  <!-- social proof -->
+  <div class="proof">
+    <div>
+      <div class="proof-count"><b>2,318</b> plans unlocked this month</div>
+      <div class="stars">★★★★★ <span style="color:var(--text-dim); font-family:'Space Grotesk',sans-serif; font-size:0.8rem;">4.9 average</span></div>
+    </div>
+    <div class="quote">"Handed the PDF straight to my loan officer. Didn't touch a spreadsheet." — verified buyer</div>
+  </div>
+
+  <!-- bonus -->
+  <div class="bonus">
+    <svg class="bonus-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4L12 2z" stroke="#f0cf5f" stroke-width="1.4" stroke-linejoin="round"/></svg>
+    <div>
+      <div class="bonus-title">Unlock today and get a bonus one-page pitch summary</div>
+      <div class="bonus-sub">A condensed, single-page version of your plan — built for texting to a partner or pinning to a wall.</div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="foot">LaunchMind · a Driftocity product</footer>
+
+<div class="sticky-cta">
+  <div class="sticky-inner">
+    <div>
+      <div class="price-block">
+        <span class="price">$17</span>
+        <span class="price-note">one-time · no subscription</span>
       </div>
-      <ul class="unlock-list">
-        <li><span class="check">✓</span> Complete revenue model & pricing strategy</li>
-        <li><span class="check">✓</span> Step-by-step 90-day launch roadmap</li>
-        <li><span class="check">✓</span> Competitor analysis & your unique angle</li>
-        <li><span class="check">✓</span> Marketing channels that fit your budget</li>
-        <li><span class="check">✓</span> Downloadable plan you can keep forever</li>
-      </ul>
-      <button class="btn btn-green" onclick="handlePurchase()">Get My Full Plan — $17 →</button>
-      <div class="guarantee">🛡️ 30-day money-back guarantee · No questions asked</div>
+      <div class="cta-sub">Less than a single hour with a business consultant.</div>
+    </div>
+    <div style="text-align:right;">
+      <button class="cta-btn" onclick="alert('This connects to your Stripe checkout.')">
+        Unlock full plan + PDF
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
   </div>
-
-  <!-- SCREEN 4: FULL PLAN -->
-  <div class="screen" id="screen4">
-    <div class="card" style="border-color: var(--green);">
-      <div class="card-label" style="color: var(--green);">✓ Payment Confirmed — Full Plan Unlocked</div>
-      <h2>Your Complete Business Plan</h2>
-      <p>Built specifically for your idea. Save it, share it, or use it to pitch investors.</p>
-    </div>
-    <div id="fullPlanOutput"></div>
-    <div style="margin-top:24px; text-align:center;">
-      <button class="download-btn" onclick="downloadPlan()">⬇ Download as Text File</button>
-    </div>
-  </div>
-
 </div>
+
+</div><!-- /resultsRoot -->
 
 <script>
-// NOTE: No API key here anymore. The browser calls our own /api/generate
-// serverless route, which holds the real Anthropic key server-side.
-
-let userData = {};
-let fullPlanText = '';
-
-window.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('paid') === 'true') {
-    const saved = sessionStorage.getItem('launchmind_data');
-    if (saved) {
-      userData = JSON.parse(saved);
-      unlockFullPlan();
+  // countdown timer
+  (function(){
+    let total = 23*3600 + 58*60 + 41;
+    const el = document.getElementById('clock');
+    function tick(){
+      if(total <= 0){ el.textContent = "00:00:00"; return; }
+      total--;
+      const h = String(Math.floor(total/3600)).padStart(2,'0');
+      const m = String(Math.floor((total%3600)/60)).padStart(2,'0');
+      const s = String(total%60).padStart(2,'0');
+      el.textContent = `${h}:${m}:${s}`;
     }
-  }
-});
+    setInterval(tick, 1000);
+  })();
 
-async function callClaude(prompt, maxTokens = 1000) {
-  const resp = await fetch('/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, max_tokens: maxTokens })
-  });
-
-  const data = await resp.json();
-
-  if (!resp.ok) throw new Error(data.error || 'API error ' + resp.status);
-  if (!data.text) throw new Error('No response from AI');
-
-  return data.text;
-}
-
-async function typeOut(elementId, text, speed = 6) {
-  const el = document.getElementById(elementId);
-  el.classList.add('typing');
-  el.textContent = '';
-  for (let i = 0; i < text.length; i++) {
-    el.textContent += text[i];
-    await new Promise(r => setTimeout(r, speed));
-  }
-  el.classList.remove('typing');
-}
-
-function showScreen(n) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen' + n).classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  const prog = { 1: 20, 2: 50, 3: 75, 4: 100 };
-  document.getElementById('progressBar').style.width = prog[n] + '%';
-  const pills = ['pill1','pill2','pill3'];
-  const doneMap = { 2: ['pill1'], 3: ['pill1','pill2'], 4: ['pill1','pill2','pill3'] };
-  const activeMap = { 1: 'pill1', 2: 'pill2', 3: 'pill3', 4: null };
-  pills.forEach(p => document.getElementById(p).classList.remove('active','done'));
-  (doneMap[n] || []).forEach(p => document.getElementById(p).classList.add('done'));
-  if (activeMap[n]) document.getElementById(activeMap[n]).classList.add('active');
-}
-
-async function runStep1() {
-  const idea = document.getElementById('idea').value.trim();
-  const industry = document.getElementById('industry').value;
-  const budget = document.getElementById('budget').value;
-  const err = document.getElementById('err1');
-
-  if (!idea || !industry || !budget) {
-    err.textContent = 'Please fill in all fields before continuing.';
-    return;
-  }
-  err.textContent = '';
-  userData = { idea, industry, budget };
-
-  const btn = document.getElementById('btn1');
-  btn.disabled = true;
-  btn.textContent = 'Analyzing your idea...';
-
-  showScreen(2);
-  document.getElementById('out1').textContent = '';
-  document.getElementById('btn2').disabled = true;
-
-  try {
-    const prompt = `You are a startup advisor. Analyze this business idea in 3-4 short paragraphs. Be direct, specific, and encouraging but honest. Cover: (1) whether the idea has real market demand, (2) the biggest opportunity, (3) the main risk to watch out for.
-
-Business idea: ${idea}
-Industry: ${industry}
-Budget: ${budget}
-
-Keep it conversational and under 200 words. No headers, just flowing paragraphs.`;
-
-    const result = await callClaude(prompt, 600);
-    await typeOut('out1', result, 6);
-    userData.validation = result;
-  } catch(e) {
-    document.getElementById('out1').textContent = 'Error: ' + e.message;
-    document.getElementById('out1').classList.remove('typing');
-  }
-
-  document.getElementById('btn2').disabled = false;
-  btn.disabled = false;
-  btn.textContent = 'Validate My Idea →';
-}
-
-async function runStep2() {
-  const customer = document.getElementById('customer').value;
-  const problem = document.getElementById('problem').value.trim();
-  const err = document.getElementById('err2');
-
-  if (!customer || !problem) {
-    err.textContent = 'Please fill in all fields before continuing.';
-    return;
-  }
-  err.textContent = '';
-  userData.customer = customer;
-  userData.problem = problem;
-
-  const btn = document.getElementById('btn2');
-  btn.disabled = true;
-  btn.textContent = 'Analyzing your market...';
-
-  showScreen(3);
-  document.getElementById('out2').textContent = '';
-
-  try {
-    const prompt = `You are a market research expert. Write a clear, practical target market analysis in 3 short paragraphs. Cover: (1) who the ideal customer is and their key traits, (2) how large and reachable the market is, (3) the best way to find and attract these customers.
-
-Business idea: ${userData.idea}
-Industry: ${userData.industry}
-Target customer: ${customer}
-Problem being solved: ${problem}
-
-Keep it under 180 words. No headers, conversational tone, specific and actionable.`;
-
-    const result = await callClaude(prompt, 500);
-    await typeOut('out2', result, 6);
-    userData.market = result;
-  } catch(e) {
-    document.getElementById('out2').textContent = 'Error: ' + e.message;
-    document.getElementById('out2').classList.remove('typing');
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Analyze My Market →';
-}
-
-function handlePurchase() {
-  sessionStorage.setItem('launchmind_data', JSON.stringify(userData));
-  window.location.href = 'https://buy.stripe.com/3cIcN5ghSglUf7R7cP00007';
-}
-
-async function unlockFullPlan() {
-  showScreen(4);
-  const container = document.getElementById('fullPlanOutput');
-  container.innerHTML = '<div class="loader"><div class="spinner"></div> Building your full business plan...</div>';
-
-  try {
-    const prompt = `You are a professional business consultant. Write a detailed, actionable business plan. Use these exact section labels on their own line in ALL CAPS followed by a colon:
-
-REVENUE MODEL:
-PRICING STRATEGY:
-90-DAY LAUNCH ROADMAP:
-COMPETITOR LANDSCAPE:
-YOUR UNIQUE ANGLE:
-MARKETING CHANNELS:
-FIRST 5 ACTION STEPS:
-
-Business idea: ${userData.idea || 'Not provided'}
-Industry: ${userData.industry || 'Not provided'}
-Budget: ${userData.budget || 'Not provided'}
-Target customer: ${userData.customer || 'Not provided'}
-Problem solved: ${userData.problem || 'Not provided'}
-
-Be specific and practical. Each section 3-6 sentences or bullet points. Total around 500-600 words. Write like a mentor who wants them to succeed.`;
-
-    const result = await callClaude(prompt, 1500);
-    fullPlanText = result;
-
-    const sections = parsePlan(result);
-    container.innerHTML = '';
-    sections.forEach(({ title, content }) => {
-      const block = document.createElement('div');
-      block.className = 'result-section';
-      block.innerHTML = '<h3>' + title + '</h3><div>' + content.replace(/\n/g, '<br>') + '</div>';
-      container.appendChild(block);
+  function revealResults(){
+    const nameInput = document.getElementById('bizName').value.trim();
+    const bizName = nameInput.length ? nameInput : 'Your Business';
+    document.querySelectorAll('.js-biz-name').forEach(function(el){
+      el.textContent = bizName;
     });
-
-  } catch(e) {
-    container.innerHTML = '<div class="error-msg">Error: ' + e.message + '</div>';
+    document.getElementById('signupRoot').classList.add('hide');
+    document.getElementById('resultsRoot').classList.add('show');
+    window.scrollTo({top:0, behavior:'smooth'});
   }
-}
-
-function parsePlan(text) {
-  const labels = ['REVENUE MODEL','PRICING STRATEGY','90-DAY LAUNCH ROADMAP','COMPETITOR LANDSCAPE','YOUR UNIQUE ANGLE','MARKETING CHANNELS','FIRST 5 ACTION STEPS'];
-  const results = [];
-  labels.forEach((label, i) => {
-    const regex = new RegExp(label + ':\\s*', 'i');
-    const match = text.search(regex);
-    if (match === -1) return;
-    const after = text.slice(match).replace(regex, '');
-    let content = after;
-    const nextLabel = labels.slice(i + 1).find(l => new RegExp(l + ':', 'i').test(after));
-    if (nextLabel) {
-      const cut = after.search(new RegExp(nextLabel + ':', 'i'));
-      if (cut > -1) content = after.slice(0, cut);
-    }
-    results.push({ title: label.charAt(0) + label.slice(1).toLowerCase(), content: content.trim() });
-  });
-  return results.length ? results : [{ title: 'Your Business Plan', content: text }];
-}
-
-function downloadPlan() {
-  const text = 'LAUNCHMIND — BUSINESS PLAN\n' + '='.repeat(40) + '\nIdea: ' + (userData.idea || '') + '\nIndustry: ' + (userData.industry || '') + '\nBudget: ' + (userData.budget || '') + '\n' + '='.repeat(40) + '\n\n' + fullPlanText;
-  const blob = new Blob([text], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'LaunchMind-Business-Plan.txt';
-  a.click();
-}
 </script>
+
 </body>
 </html>
